@@ -1,13 +1,27 @@
+// TODO: チュートリアルを進めて一個コマンドを作る
+// https://cli.urfave.org/v2/getting-started/
+
 package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/urfave/cli/v2"
 )
 
-var subCmdList = []cli.Command{}
-
 func main() {
-	fmt.Println("Hello, World!")
+	app := &cli.App{
+		Name:  "greet",
+		Usage: "fight the loneliness!",
+		Action: func(*cli.Context) error {
+			fmt.Println("Hello friend!")
+			return nil
+		},
+	}
+
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
