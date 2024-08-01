@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/atotto/clipboard"
 	"github.com/urfave/cli/v2"
 )
 
-var subCmdList = []cli.Command{}
+var subCmdList = []*cli.Command{}
 
 func main() {
 	app := &cli.App{
@@ -33,14 +35,23 @@ func main() {
 }
 
 func giphyRandom(cCtx *cli.Context) error {
-	fmt.Println(cCtx.String("tag"))
-	getImageURL(cCtx.String("tag"))
+	imageURL, err := getImageURL(cCtx.String("tag"))
+	if err != nil {
+		return fmt.Errorf("failed to get image url: %w", err)
+	}
+
+	clipboard.WriteAll(formatForMarkdown(imageURL))
+
 	return nil
 }
 
 func getImageURL(tag string) (string, error) {
-	api_key := os.Getenv("GIPHY_API_KEY")
-	resp, err := http.Get(fmt.Sprintf("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s&rating=g", api_key, tag))
+	apiKey := os.Getenv("GIPHY_API_KEY")
+	if apiKey == "" {
+		return "", errors.New("empty API Key")
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s&rating=g", apiKey, tag))
 	if err != nil {
 		return "", fmt.Errorf("failed to get image: %w", err)
 	}
@@ -56,6 +67,10 @@ func getImageURL(tag string) (string, error) {
 	}
 
 	return giphyResponse.Data.Images.Original.URL, nil
+}
+
+func formatForMarkdown(url string) string {
+	return fmt.Sprintf("![LGTM](%s)", url)
 }
 
 type GiphyResponse struct {
