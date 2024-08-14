@@ -10,7 +10,6 @@ import (
 var subCmdList = []*cli.Command{}
 
 func main() {
-
 	app := &cli.App{
 		Name:     "lgtm-generator",
 		Usage:    "CLI for lgtm image",

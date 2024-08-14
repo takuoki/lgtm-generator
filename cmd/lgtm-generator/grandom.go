@@ -23,22 +23,33 @@ func init() {
 				Usage: "search keyword",
 			},
 		},
-		Action: giphyRandom,
+		Action: (&giphyRandomCmd{}).action,
 	})
 }
 
-func giphyRandom(cCtx *cli.Context) error {
-	imageURL, err := getImageURL(cCtx.String("tag"))
+type giphyRandomCmd struct{}
+
+func (c *giphyRandomCmd) action(cCtx *cli.Context) error {
+	c.run(os.Stdout, cCtx.String("tag"))
+	return nil
+}
+
+func (c *giphyRandomCmd) run(out io.Writer, tag string) error {
+	imageURL, err := c.getImageURL(tag)
 	if err != nil {
 		return fmt.Errorf("failed to get image url: %w", err)
 	}
 
-	clipboard.WriteAll(formatForMarkdown(imageURL))
+	clipboard.WriteAll(c.formatForMarkdown(imageURL))
+
+	if _, err := out.Write([]byte("copied!\n")); err != nil {
+		return fmt.Errorf("failed to write output: %w", err)
+	}
 
 	return nil
 }
 
-func getImageURL(tag string) (string, error) {
+func (c *giphyRandomCmd) getImageURL(tag string) (string, error) {
 	apiKey := os.Getenv("GIPHY_API_KEY")
 	if apiKey == "" {
 		return "", errors.New("empty API Key")
@@ -62,7 +73,7 @@ func getImageURL(tag string) (string, error) {
 	return giphyResponse.Data.Images.Original.URL, nil
 }
 
-func formatForMarkdown(url string) string {
+func (c *giphyRandomCmd) formatForMarkdown(url string) string {
 	return fmt.Sprintf("![LGTM](%s)", url)
 }
 
