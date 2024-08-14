@@ -12,13 +12,9 @@ var subCmdList = []*cli.Command{}
 func main() {
 
 	app := &cli.App{
-		Commands: []*cli.Command{
-			{
-				Name:        "lgtm-generator",
-				Usage:       "CLI for lgtm image",
-				Subcommands: subCmdList,
-			},
-		},
+		Name:     "lgtm-generator",
+		Usage:    "CLI for lgtm image",
+		Commands: subCmdList,
 	}
 
 	if err := app.Run(os.Args); err != nil {

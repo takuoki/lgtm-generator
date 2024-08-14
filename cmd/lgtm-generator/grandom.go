@@ -14,7 +14,7 @@ import (
 
 func init() {
 	subCmdList = append(subCmdList, &cli.Command{
-		Name:  "grandom",
+		Name:  "giphy-random",
 		Usage: "get randomly giphy image url",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
