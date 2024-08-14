@@ -22,7 +22,7 @@ go.work
 go.work.sum
 
 # binary
-lgtm-generator
+cmd/lgtm-generator/lgtm-generator
 
 # Secrets
 .env
