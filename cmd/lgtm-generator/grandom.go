@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/atotto/clipboard"
@@ -30,8 +31,7 @@ func init() {
 type giphyRandomCmd struct{}
 
 func (c *giphyRandomCmd) action(cCtx *cli.Context) error {
-	c.run(os.Stdout, cCtx.String("tag"))
-	return nil
+	return c.run(os.Stdout, cCtx.String("tag"))
 }
 
 func (c *giphyRandomCmd) run(out io.Writer, tag string) error {
@@ -55,7 +55,12 @@ func (c *giphyRandomCmd) getImageURL(tag string) (string, error) {
 		return "", errors.New("empty API Key")
 	}
 
-	resp, err := http.Get(fmt.Sprintf("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s&rating=g", apiKey, tag))
+	v := url.Values{}
+	v.Add("api_key", apiKey)
+	v.Add("tag", tag)
+	v.Add("rating", "g")
+
+	resp, err := http.Get(fmt.Sprintf("https://api.giphy.com/v1/gifs/random?%s", v.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("failed to get image: %w", err)
 	}
