@@ -31,7 +31,15 @@ func init() {
 type giphyRandomCmd struct{}
 
 func (c *giphyRandomCmd) action(cCtx *cli.Context) error {
-	return c.run(os.Stdout, cCtx.String("tag"))
+	if err := c.run(os.Stdout, cCtx.String("tag")); err != nil {
+		var clientError *ClientError
+		if errors.As(err, &clientError) {
+			fmt.Println("Error:", clientError)
+		} else {
+			fmt.Println(err)
+		}
+	}
+	return nil
 }
 
 func (c *giphyRandomCmd) run(out io.Writer, tag string) error {
@@ -49,10 +57,18 @@ func (c *giphyRandomCmd) run(out io.Writer, tag string) error {
 	return nil
 }
 
+type ClientError struct {
+	msg string
+}
+
+func (e *ClientError) Error() string {
+	return e.msg
+}
+
 func (c *giphyRandomCmd) getImageURL(tag string) (string, error) {
 	apiKey := os.Getenv("GIPHY_API_KEY")
 	if apiKey == "" {
-		return "", errors.New("empty API Key")
+		return "", &ClientError{msg: "gyphy API Key not provided. Please specify your API Key."}
 	}
 
 	v := url.Values{}
