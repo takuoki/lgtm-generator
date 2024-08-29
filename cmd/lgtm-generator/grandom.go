@@ -35,8 +35,10 @@ func (c *giphyRandomCmd) action(cCtx *cli.Context) error {
 		var clientError *ClientError
 		if errors.As(err, &clientError) {
 			fmt.Println("Error:", clientError)
-		} else {
+		} else if cCtx.Bool("verbose") {
 			fmt.Println(err)
+		} else {
+			fmt.Println("An internal error occurred. Sorry...")
 		}
 	}
 	return nil
