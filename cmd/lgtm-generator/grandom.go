@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -82,10 +83,24 @@ func (c *giphyRandomCmd) getImageURL(tag string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get image: %w", err)
 	}
+	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		break
+	case http.StatusUnauthorized:
+		return "", &ClientError{msg: "your API Key is unauthorized. Please check your API Key."}
+	default:
+		buf := &bytes.Buffer{}
+		if err := json.Compact(buf, respBody); err != nil {
+			return "", fmt.Errorf("failed to compact response body: %w", err)
+		}
+		return "", fmt.Errorf("error occurred in giphy API: %s", buf.String())
 	}
 
 	giphyResponse := GiphyResponse{}
