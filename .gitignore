@@ -20,3 +20,9 @@
 # Go workspace file
 go.work
 go.work.sum
+
+# binary
+cmd/lgtm-generator/lgtm-generator
+
+# Secrets
+.env
